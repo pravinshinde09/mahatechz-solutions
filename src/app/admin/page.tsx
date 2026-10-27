@@ -21,7 +21,7 @@ const roadmap = [
   { phase: "Phase 1", label: "Accounts, staff invitations and two-factor security", done: true },
   { phase: "Phase 2", label: "Categories, course builder, video and resource uploads", done: true },
   { phase: "Phase 3", label: "Razorpay checkout, offline payment verification, enrolments", done: true },
-  { phase: "Phase 4", label: "Course player, progress tracking, live classes, support (web) — Android app next", done: false },
+  { phase: "Phase 4", label: "Course player, progress tracking, live classes, support, Android app (device testing pending)", done: false },
   { phase: "Phase 5", label: "Certificates, analytics and reports", done: false },
 ];
 
