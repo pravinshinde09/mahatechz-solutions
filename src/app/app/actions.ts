@@ -1,6 +1,9 @@
 "use server";
 
 import { revalidatePath } from "next/cache";
+import { cookies } from "next/headers";
+import { redirect } from "next/navigation";
+import { clearSessionCookies } from "@/lib/auth/cookies";
 import { apiRequest } from "@/lib/api/server";
 import { changePasswordRequestSchema } from "@/lib/contracts/auth";
 import { updateProfileRequestSchema } from "@/lib/contracts/me";
@@ -46,4 +49,17 @@ export async function changePasswordAction(_prev: FormState, form: FormData): Pr
   const res = await apiRequest("/auth/password/change", { method: "POST", body: parsed.data, accessToken });
   if (!res.ok) return fromApi(res.error);
   return { status: "success", message: "Password changed. Other devices have been signed out." };
+}
+
+/** Spec §18.4: 14-day grace period; the API signs out every device, so this one is cleared too. */
+export async function requestDeletionAction(_prev: FormState, form: FormData): Promise<FormState> {
+  const accessToken = await getAccessToken();
+  if (!accessToken) return expired;
+  if (text(form, "confirm").trim().toUpperCase() !== "DELETE") {
+    return { status: "error", message: "Please fix the highlighted fields.", fieldErrors: { confirm: "Type DELETE to confirm." } };
+  }
+  const res = await apiRequest("/me/deletion-request", { method: "POST", body: { password: text(form, "password") }, accessToken });
+  if (!res.ok) return fromApi(res.error);
+  clearSessionCookies(await cookies());
+  redirect("/login?reason=deletion-requested");
 }

@@ -3,7 +3,7 @@ import type { ReactNode } from "react";
 import { PageHeader } from "@/components/layout/page-header";
 import { Button } from "@/components/ui/button";
 import { requireUser } from "@/lib/auth/session";
-import { ChangePasswordForm, ProfileForm } from "./settings-forms";
+import { ChangePasswordForm, DeleteAccountForm, ProfileForm } from "./settings-forms";
 
 export const metadata: Metadata = { title: "Settings" };
 
@@ -38,6 +38,14 @@ export default async function SettingsPage() {
             </Button>
           </form>
         </Section>
+        {!user.isStaff ? (
+          <Section title="Delete account" description="Your account is deleted 14 days after you ask. Signing in before then cancels it.">
+            <p className="mb-4 text-sm text-muted-foreground">
+              Your profile, notifications and support attachments are removed. Payment and certificate records are kept as the law requires, without your contact details. You lose access to your courses.
+            </p>
+            <DeleteAccountForm />
+          </Section>
+        ) : null}
       </div>
     </>
   );

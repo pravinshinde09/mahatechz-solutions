@@ -6,7 +6,7 @@ import { FormMessage } from "@/components/forms/form-message";
 import { PasswordField } from "@/components/forms/password-field";
 import { SubmitButton } from "@/components/forms/submit-button";
 import { idle } from "@/lib/forms";
-import { changePasswordAction, updateProfileAction } from "../actions";
+import { changePasswordAction, requestDeletionAction, updateProfileAction } from "../actions";
 
 export function ProfileForm({ fullName, phone, email }: { fullName: string; phone: string | null; email: string }) {
   const [state, action] = useActionState(updateProfileAction, idle);
@@ -44,6 +44,20 @@ export function ChangePasswordForm({ email }: { email: string }) {
       <PasswordField name="confirmPassword" label="Confirm new password" autoComplete="new-password" error={state.fieldErrors?.confirmPassword} />
       <SubmitButton size="default" className="justify-self-start">
         Change password
+      </SubmitButton>
+    </form>
+  );
+}
+
+export function DeleteAccountForm() {
+  const [state, action] = useActionState(requestDeletionAction, idle);
+  return (
+    <form action={action} className="grid gap-4" noValidate>
+      <FormMessage state={state} />
+      <PasswordField name="password" label="Your password" autoComplete="current-password" error={state.fieldErrors?.password} />
+      <Field id="delete-confirm" name="confirm" label="Type DELETE to confirm" autoComplete="off" error={state.fieldErrors?.confirm} />
+      <SubmitButton variant="destructive" className="justify-self-start">
+        Delete my account
       </SubmitButton>
     </form>
   );

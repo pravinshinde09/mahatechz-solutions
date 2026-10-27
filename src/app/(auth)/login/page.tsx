@@ -15,6 +15,7 @@ const notices = {
   expired: { variant: "info", icon: Info, text: "Your session ended. Please sign in again." },
   suspended: { variant: "destructive", icon: CircleAlert, text: "Your account is suspended. Please contact support." },
   "password-set": { variant: "success", icon: CircleCheck, text: "Your password has been set. Sign in to continue." },
+  "deletion-requested": { variant: "info", icon: Info, text: "Your account will be deleted in 14 days. Sign in before then if you change your mind." },
   "invitation-accepted": { variant: "success", icon: CircleCheck, text: "Your staff account is ready. Sign in, then enable two-factor authentication." },
 } as const;
 
