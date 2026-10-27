@@ -97,20 +97,22 @@ export default async function CourseDetailPage(props: PageProps<"/courses/[slug]
                   <Button size="lg" className="w-full" asChild>
                     <Link href="/app/courses">Go to course</Link>
                   </Button>
+                ) : course.viewer.enrollmentStatus === "PENDING" ? (
+                  <Button size="lg" variant="outline" className="w-full" asChild>
+                    <Link href="/app/payments">Payment under verification</Link>
+                  </Button>
+                ) : course.enrollmentMode !== "OPEN" ? (
+                  <Button size="lg" className="w-full" disabled aria-disabled="true">
+                    Enrolment closed
+                  </Button>
                 ) : (
                   <>
-                    {/* Checkout (Razorpay and offline payment) arrives in Phase 3. */}
-                    <Button size="lg" className="w-full" disabled aria-disabled="true">
-                      Enrolment opens soon
+                    <Button size="lg" className="w-full" asChild>
+                      <Link href={user ? `/checkout/${course.id}` : `/login?next=${encodeURIComponent(`/checkout/${course.id}`)}`}>
+                        {course.price.isFree ? "Enrol for free" : "Buy now"}
+                      </Link>
                     </Button>
-                    {!user ? (
-                      <p className="text-center text-sm text-muted-foreground">
-                        <Link href={`/register`} className="text-primary hover:underline">
-                          Create a free account
-                        </Link>{" "}
-                        to be notified.
-                      </p>
-                    ) : null}
+                    {!course.price.isFree ? <p className="text-center text-xs text-muted-foreground">Pay online, or by UPI / bank transfer.</p> : null}
                   </>
                 )}
                 <ul className="grid gap-2 text-sm text-muted-foreground">

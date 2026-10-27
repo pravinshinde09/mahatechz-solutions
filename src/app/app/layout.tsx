@@ -5,10 +5,11 @@ import { requireUser } from "@/lib/auth/session";
 
 export const metadata: Metadata = { title: { default: "Dashboard", template: "%s · Mahatecz Learning" }, robots: { index: false } };
 
-// Further sections (live classes, certificates, payments, support) arrive with their phases (§31).
+// Further sections (live classes, certificates, support) arrive with their phases (§31).
 const nav: NavItem[] = [
   { href: "/app", label: "Dashboard", icon: "dashboard", exact: true },
   { href: "/app/courses", label: "My courses", icon: "courses" },
+  { href: "/app/payments", label: "Payments", icon: "payments" },
   { href: "/app/settings", label: "Settings", icon: "settings" },
 ];
 

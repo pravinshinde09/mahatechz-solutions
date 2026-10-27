@@ -13,7 +13,18 @@ const LIMITS: Partial<Record<MediaPurpose, { accept: string; maxBytes: number; h
   LECTURE_VIDEO: { accept: ".mp4,.mov,.mkv,.webm", maxBytes: 4096 * MB, hint: "MP4 (H.264) preferred, up to 4 GB — uploads resume if the connection drops" },
   DOCUMENT: { accept: ".pdf,.jpg,.jpeg,.png,.webp", maxBytes: 50 * MB, hint: "PDF or image, up to 50 MB" },
   PRACTICE_FILE: { accept: ".dwg,.dxf,.rvt,.rfa,.zip", maxBytes: 200 * MB, hint: "DWG, DXF, RVT, RFA or ZIP, up to 200 MB" },
+  PAYMENT_PROOF: { accept: ".jpg,.jpeg,.png,.pdf", maxBytes: 5 * MB, hint: "Screenshot (JPG/PNG) or PDF receipt, up to 5 MB" },
 };
+
+type StartResult = Awaited<ReturnType<typeof startUploadAction>>;
+type CompleteResult = Awaited<ReturnType<typeof completeUploadAction>>;
+/** Which Server Actions authorise and confirm the upload — staff media by default. */
+export interface UploadActions {
+  start(input: { purpose: MediaPurpose; filename: string; mimeType: string; sizeBytes: number; title?: string }): Promise<StartResult>;
+  complete(mediaAssetId: string, providerResult?: Record<string, unknown>): Promise<CompleteResult>;
+  renew?(mediaAssetId: string): Promise<StartResult>;
+}
+const staffActions: UploadActions = { start: startUploadAction, complete: completeUploadAction, renew: renewUploadAction };
 
 const MIME_BY_EXT: Record<string, string> = { mkv: "video/x-matroska", dwg: "application/octet-stream", dxf: "application/octet-stream", rvt: "application/octet-stream", rfa: "application/octet-stream" };
 const mimeOf = (file: File) => {
@@ -44,7 +55,7 @@ function xhrSend(method: "PUT" | "POST", url: string, body: Document | XMLHttpRe
   return { done, controller: { abort: () => xhr.abort() } satisfies Controller };
 }
 
-async function sendBytes(file: File, mediaAssetId: string, upload: UploadInstruction, onProgress: (p: number) => void, setController: (c: Controller) => void) {
+async function sendBytes(file: File, mediaAssetId: string, upload: UploadInstruction, onProgress: (p: number) => void, setController: (c: Controller) => void, renew?: UploadActions["renew"]) {
   if (upload.protocol === "put") {
     const { done, controller } = xhrSend("PUT", upload.url, file, upload.headers, onProgress);
     setController(controller);
@@ -75,7 +86,7 @@ async function sendBytes(file: File, mediaAssetId: string, upload: UploadInstruc
       onShouldRetry: (err) => {
         const status = (err as { originalResponse?: { getStatus(): number } }).originalResponse?.getStatus() ?? 0;
         if (status === 401 || status === 403) {
-          void renewUploadAction(mediaAssetId).then((renewed) => {
+          void renew?.(mediaAssetId).then((renewed) => {
             if (renewed.ok && renewed.upload.protocol === "tus") headers = renewed.upload.headers;
           });
         }
@@ -100,10 +111,12 @@ export function Uploader({
   title,
   label = "Upload a file",
   onUploaded,
+  actions = staffActions,
 }: {
   purpose: MediaPurpose;
   title?: string;
   label?: string;
+  actions?: UploadActions;
   onUploaded: (asset: MediaAsset) => void | Promise<void>;
 }) {
   const [state, setState] = useState<State>({ phase: "idle" });
@@ -116,7 +129,7 @@ export function Uploader({
     if (limits && file.size > limits.maxBytes) return setState({ phase: "error", message: `This file is larger than ${Math.round(limits.maxBytes / MB)} MB.` });
     setState({ phase: "uploading", name: file.name, percent: 0, paused: false, resumable: false });
     try {
-      const start = await startUploadAction({ purpose, filename: file.name, mimeType: mimeOf(file), sizeBytes: file.size, ...(title ? { title } : {}) });
+      const start = await actions.start({ purpose, filename: file.name, mimeType: mimeOf(file), sizeBytes: file.size, ...(title ? { title } : {}) });
       if (!start.ok) throw new Error(start.message);
       const providerResult = await sendBytes(
         file,
@@ -127,9 +140,10 @@ export function Uploader({
           controller.current = c;
           setState((s) => (s.phase === "uploading" ? { ...s, resumable: Boolean(c.pause) } : s));
         },
+        actions.renew,
       );
       setState({ phase: "verifying", name: file.name });
-      const done = await completeUploadAction(start.mediaAssetId, providerResult);
+      const done = await actions.complete(start.mediaAssetId, providerResult);
       if (!done.ok) throw new Error(done.message);
       setState({ phase: "done", name: file.name });
       await onUploaded(done.asset);

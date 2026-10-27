@@ -89,7 +89,24 @@ Radix positions popovers with style attributes.
 
 Verified end-to-end in a browser against the API (authoring → publish → public pages).
 
+**Phase 3 — Enrolment & payments:**
+- Checkout `/checkout/[courseId]` (quote, verified-email gate, terms) with Razorpay Checkout, or —
+  when the API runs `PAYMENT_PROVIDER=simulated` — a test-payment panel that signs payments the
+  same way, so the real verification path runs without Razorpay keys. Order status page polls
+  until the webhook/reconciliation settles a pending payment.
+- Free enrolment, and UPI / bank transfer (`/checkout/[courseId]/offline`: UPI QR, bank details,
+  payment note, UTR + optional screenshot proof).
+- Student: `/app/courses` (active, pending, expired), `/app/payments` (history, offline requests,
+  cancel while pending), dashboard alerts.
+- Admin: offline payment queue and verify/reject, payments list + detail with refunds, manual
+  reconciliation, enrolments (grant, extend, suspend, reactivate, revoke — all with a reason),
+  offline payment settings, dashboard KPIs (net revenue, pending offline, conversion, flagged).
+- `/checkout` is a protected area in `proxy.ts`; the CSP allows Razorpay's frames and APIs.
+
+Verified end-to-end in a browser against the API: simulated online purchase, offline submission
+→ admin approval → access, full refund (access revoked), manual grant, suspension, KPIs.
+
 Open: message catalogues for i18n (NFR-13 — strings are inline for now), Playwright + axe E2E
 suite in CI, Lighthouse CI, Sentry, deployment (Cloudflare/OpenNext spike), light-theme toggle,
-drag-and-drop reordering, a confirm dialog component (native `confirm()` for now), checkout
-(Phase 3).
+drag-and-drop reordering, a confirm dialog component (native `confirm()` for now), invoices /
+GST receipts, final legal policy pages (required before Razorpay activation).
