@@ -54,9 +54,8 @@ export function EnrollmentCard({ enrollment: e }: { enrollment: EnrollmentView }
           {usable ? (e.expiresAt ? `Access until ${formatDate(e.expiresAt)}` : "Lifetime access") : e.expiresAt && (e.status === "EXPIRED" || e.status === "ACTIVE") ? `Access ended ${formatDate(e.expiresAt)}` : ""}
         </p>
         {usable ? (
-          // The lesson player arrives in Phase 4; until then the course page shows the syllabus.
-          <Link href={`/courses/${e.course.slug}`} className="text-sm font-medium text-primary hover:underline">
-            Open course →
+          <Link href={`/app/learn/${e.course.slug}`} className="text-sm font-medium text-primary hover:underline">
+            {e.completedAt ? "Review course" : e.progressPercent > 0 ? "Continue learning" : "Start learning"} →
           </Link>
         ) : e.status === "EXPIRED" ? (
           <Link href={`/checkout/${e.course.id}`} className="text-sm font-medium text-primary hover:underline">

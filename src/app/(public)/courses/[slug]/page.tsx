@@ -95,7 +95,7 @@ export default async function CourseDetailPage(props: PageProps<"/courses/[slug]
                 <Price price={course.price} size="lg" />
                 {course.viewer.isEnrolled ? (
                   <Button size="lg" className="w-full" asChild>
-                    <Link href="/app/courses">Go to course</Link>
+                    <Link href={`/app/learn/${course.slug}`}>Go to course</Link>
                   </Button>
                 ) : course.viewer.enrollmentStatus === "PENDING" ? (
                   <Button size="lg" variant="outline" className="w-full" asChild>

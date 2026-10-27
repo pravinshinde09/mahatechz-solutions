@@ -21,7 +21,7 @@ const roadmap = [
   { phase: "Phase 1", label: "Accounts, staff invitations and two-factor security", done: true },
   { phase: "Phase 2", label: "Categories, course builder, video and resource uploads", done: true },
   { phase: "Phase 3", label: "Razorpay checkout, offline payment verification, enrolments", done: true },
-  { phase: "Phase 4", label: "Course player, progress tracking, live classes, Android app", done: false },
+  { phase: "Phase 4", label: "Course player, progress tracking, live classes, support (web) — Android app next", done: false },
   { phase: "Phase 5", label: "Certificates, analytics and reports", done: false },
 ];
 
@@ -89,6 +89,8 @@ export default async function AdminDashboardPage() {
             {hasPermission(user, "course.create") ? <Shortcut href="/admin/courses/new">Create a course</Shortcut> : null}
             {canSeeMoney ? <Shortcut href="/admin/offline-payments">Verify offline payments</Shortcut> : null}
             {hasPermission(user, "enrollment.grant") ? <Shortcut href="/admin/enrollments">Grant a student access</Shortcut> : null}
+            {hasPermission(user, "live.manage") ? <Shortcut href="/admin/live/new">Schedule a live class</Shortcut> : null}
+            {hasPermission(user, "support.manage") ? <Shortcut href="/admin/support">Answer support requests</Shortcut> : null}
             {hasPermission(user, "settings.manage") ? <Shortcut href="/admin/settings">Set UPI / bank details</Shortcut> : null}
             {hasPermission(user, "staff.invite") ? <Shortcut href="/admin/staff">Invite staff</Shortcut> : null}
           </ul>

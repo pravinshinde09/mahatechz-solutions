@@ -1,6 +1,8 @@
 import type { Metadata, Viewport } from "next";
 import { Inter, JetBrains_Mono, Space_Grotesk } from "next/font/google";
+import { headers } from "next/headers";
 import { connection } from "next/server";
+import { StyleNonce } from "@/components/layout/style-nonce";
 import "./globals.css";
 
 // Self-hosted at build time by next/font (no runtime third-party requests) — spec §21.3.
@@ -24,9 +26,11 @@ export const viewport: Viewport = {
 export default async function RootLayout({ children }: LayoutProps<"/">) {
   // Every page is rendered per request so the proxy's CSP nonce can be applied (see ADR in README).
   await connection();
+  const nonce = (await headers()).get("x-nonce") ?? undefined;
   return (
     <html lang="en-IN" className={`${inter.variable} ${spaceGrotesk.variable} ${jetbrainsMono.variable}`}>
       <body className="flex min-h-dvh flex-col">
+        <StyleNonce nonce={nonce} />
         <a
           href="#main"
           className="sr-only z-50 rounded-md bg-primary px-4 py-2 text-primary-foreground focus:not-sr-only focus:fixed focus:top-3 focus:left-3"

@@ -21,6 +21,7 @@ export function DashboardShell({
   navLabel,
   area,
   switchLink,
+  headerExtra,
   children,
 }: {
   user: CurrentUser;
@@ -28,6 +29,8 @@ export function DashboardShell({
   navLabel: string;
   area: string;
   switchLink?: { href: string; label: string };
+  /** Area-specific header controls (e.g. the student notification bell). */
+  headerExtra?: ReactNode;
   children: ReactNode;
 }) {
   return (
@@ -54,6 +57,7 @@ export function DashboardShell({
             <Logo href="/" className="text-base" />
           </div>
           <div className="ml-auto flex items-center gap-3">
+            {headerExtra}
             <div className="hidden text-right sm:block">
               <p className="text-sm leading-5 font-medium">{user.fullName}</p>
               <p className="text-xs leading-4 text-muted-foreground">{user.email}</p>

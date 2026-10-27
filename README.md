@@ -106,6 +106,27 @@ Verified end-to-end in a browser against the API (authoring → publish → publ
 Verified end-to-end in a browser against the API: simulated online purchase, offline submission
 → admin approval → access, full refund (access revoked), manual grant, suspension, KPIs.
 
+**Phase 4 — Learning experience (web):**
+- Course player `/app/learn/[course]/[lesson]`: syllabus sidebar (bottom sheet on mobile) with
+  lesson states and module counts, video / external embed / article / resource lessons, prev/next,
+  Overview / Resources / Announcements tabs. `/app/learn/[course]` resumes where the student left off.
+- Progress is the server's answer: the player sends heartbeats (30 s, pause, seek, end, tab hidden)
+  through `/api/learn/lessons/:id/:action`, a fixed allowlist BFF route that keeps the token in its
+  HttpOnly cookie and checks Origin. Bunny embeds report playback via the player.js postMessage
+  protocol; YouTube/Vimeo/Drive lessons use "Mark as complete" after the minimum time.
+- `/app` dashboard from `/me/dashboard`; `/app/progress` (progress vs. labelled activity);
+  `/app/live` + `/app/live/[id]` (join window, `.ics`, recordings, notes); `/app/notifications`
+  with a header bell; `/app/support` tickets with attachments; resources page grouped by module or
+  class date. Resource downloads go through `/api/resources/:id/download`.
+- Admin: live classes (schedule, edit, recording + notes, cancel), announcements (course or
+  platform, optional email), support queue with internal notes, status, priority and assignee.
+- Radix sheets/dialogs now get the CSP nonce (`get-nonce`), fixing the blocked scroll-lock style.
+
+Verified end-to-end in a browser: video completed from real heartbeats, article and external
+lessons after their minimum time, course completion + notification, announcements read state,
+live join (link withheld before the window), progress, support round trip with an internal note,
+admin scheduling (lookalike Meet link rejected) and announcement fan-out, 390 px mobile layout.
+
 Open: message catalogues for i18n (NFR-13 — strings are inline for now), Playwright + axe E2E
 suite in CI, Lighthouse CI, Sentry, deployment (Cloudflare/OpenNext spike), light-theme toggle,
 drag-and-drop reordering, a confirm dialog component (native `confirm()` for now), invoices /
