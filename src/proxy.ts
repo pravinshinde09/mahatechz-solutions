@@ -4,6 +4,14 @@ const isDev = process.env.NODE_ENV === "development";
 const secureCookies = process.env.COOKIE_SECURE === "true";
 const ACCESS_COOKIE = secureCookies ? "__Host-mz_at" : "mz_at";
 
+// Browser-facing API origin: serves media from the local driver in development.
+const apiOrigin = new URL(process.env.API_PUBLIC_URL ?? "http://localhost:4000").origin;
+
+// Embeds allowed for lesson players (spec §11.5) — the same hosts the API allowlists.
+const FRAME_HOSTS = ["https://www.youtube-nocookie.com", "https://player.vimeo.com", "https://drive.google.com", "https://player.mediadelivery.net"];
+// Direct-to-provider uploads (spec §11.3): Cloudinary, Bunny TUS, R2 presigned PUTs.
+const UPLOAD_HOSTS = ["https://api.cloudinary.com", "https://video.bunnycdn.com", "https://*.r2.cloudflarestorage.com"];
+
 function contentSecurityPolicy(nonce: string) {
   return [
     "default-src 'self'",
@@ -11,10 +19,11 @@ function contentSecurityPolicy(nonce: string) {
     `style-src 'self' 'nonce-${nonce}'`,
     // Radix positions popovers with style attributes; attribute styles cannot run script.
     "style-src-attr 'unsafe-inline'",
-    "img-src 'self' data: blob: https://res.cloudinary.com",
+    `img-src 'self' data: blob: https://res.cloudinary.com ${apiOrigin}`,
+    `media-src 'self' blob: ${apiOrigin}`,
     "font-src 'self'",
-    "connect-src 'self'",
-    "frame-src 'none'",
+    `connect-src 'self' ${apiOrigin} ${UPLOAD_HOSTS.join(" ")}`,
+    `frame-src ${FRAME_HOSTS.join(" ")}`,
     "object-src 'none'",
     "base-uri 'self'",
     "form-action 'self'",

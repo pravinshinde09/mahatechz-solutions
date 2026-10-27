@@ -1,14 +1,11 @@
 import { ArrowRight, Award, BookOpenCheck, FileStack, Radio } from "lucide-react";
 import Link from "next/link";
+import { CourseCard } from "@/components/course/course-card";
 import { Button } from "@/components/ui/button";
+import { apiPage, apiRequest } from "@/lib/api/server";
+import type { CourseCard as CourseCardData } from "@/lib/contracts/catalog";
 
-// Launch categories mirror the API seed; Phase 2 renders them from GET /categories.
-const categories = [
-  { name: "AutoCAD Electrical", blurb: "Schematics, panel layouts, PLC I/O drawings and reports.", tag: "Electrical" },
-  { name: "Revit MEP (Electrical)", blurb: "BIM workflows for lighting, power and circuiting.", tag: "BIM & MEP" },
-  { name: "Electrical Design", blurb: "Load calculations, cable sizing and protection design.", tag: "Electrical" },
-  { name: "PLC & SCADA", blurb: "Ladder logic, HMI screens and industrial automation basics.", tag: "Automation" },
-];
+type CategoryNode = { id: string; name: string; slug: string; description: string | null; courseCount: number; children: { name: string }[] };
 
 const reasons = [
   { icon: BookOpenCheck, title: "Recorded lectures", body: "Study at your pace and resume exactly where you stopped — on web or Android." },
@@ -39,7 +36,10 @@ const faqs = [
   },
 ];
 
-export default function HomePage() {
+export default async function HomePage() {
+  const [categoryRes, newest] = await Promise.all([apiRequest<CategoryNode[]>("/categories"), apiPage<CourseCardData>("/courses?limit=3")]);
+  const categories = categoryRes.ok ? categoryRes.data : [];
+  const courses = newest?.data ?? [];
   return (
     <>
       {/* Hero */}
@@ -88,19 +88,36 @@ export default function HomePage() {
         </div>
         <ul className="mt-8 grid gap-4 sm:grid-cols-2 lg:grid-cols-4">
           {categories.map((c) => (
-            <li key={c.name}>
+            <li key={c.id}>
               <Link
-                href="/courses"
+                href={`/courses?category=${c.slug}`}
                 className="group flex h-full flex-col rounded-md border border-border bg-surface p-5 shadow-card transition-colors duration-[120ms] hover:border-primary/40 hover:bg-surface-raised"
               >
-                <span className="text-xs font-medium tracking-[0.02em] text-violet uppercase">{c.tag}</span>
+                <span className="font-mono text-xs tracking-[0.02em] text-violet uppercase tabular">
+                  {c.courseCount ? `${c.courseCount} ${c.courseCount === 1 ? "course" : "courses"}` : "Coming soon"}
+                </span>
                 <span className="mt-3 text-xl leading-7 font-semibold group-hover:text-primary">{c.name}</span>
-                <span className="mt-2 text-sm leading-[22px] text-muted-foreground">{c.blurb}</span>
+                <span className="mt-2 text-sm leading-[22px] text-muted-foreground">{c.description ?? c.children.map((child) => child.name).join(" · ")}</span>
               </Link>
             </li>
           ))}
         </ul>
       </section>
+
+      {courses.length ? (
+        <section className="mx-auto max-w-7xl px-4 pb-16 md:px-6 lg:px-8" aria-labelledby="newest-heading">
+          <h2 id="newest-heading" className="text-[28px] leading-9 font-semibold">
+            Newest courses
+          </h2>
+          <ul className="mt-8 grid gap-5 sm:grid-cols-2 lg:grid-cols-3">
+            {courses.map((course) => (
+              <li key={course.id}>
+                <CourseCard course={course} />
+              </li>
+            ))}
+          </ul>
+        </section>
+      ) : null}
 
       {/* Why learn with us */}
       <section className="border-y border-border bg-surface/40" aria-labelledby="why-heading">

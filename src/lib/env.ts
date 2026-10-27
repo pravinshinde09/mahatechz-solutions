@@ -4,6 +4,8 @@ import { z } from "zod";
 // Server-only configuration. The web server never holds database or provider secrets (spec §18.5).
 const schema = z.object({
   API_INTERNAL_URL: z.url().default("http://localhost:4000"),
+  /** Browser-facing API origin (local media URLs in development). */
+  API_PUBLIC_URL: z.url().default("http://localhost:4000"),
   WEB_APP_URL: z.url().default("http://localhost:3000"),
   COOKIE_SECURE: z
     .enum(["true", "false"])

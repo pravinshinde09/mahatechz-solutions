@@ -38,7 +38,10 @@ export function fromApi(error: ApiError, values?: Record<string, string>): FormS
   const fieldErrors: Record<string, string> = {};
   for (const d of error.details ?? []) {
     const key = d.path.replace(/^body\./, "").split(".")[0];
-    if (key) fieldErrors[key] ??= error.code === "VALIDATION_FAILED" && error.details?.length === 1 ? error.message : d.issue;
+    // Schema validation carries the specific reason in the detail; service errors put a friendly
+    // sentence in `message` and a short code in the detail.
+    const generic = error.message === "The request is invalid.";
+    if (key) fieldErrors[key] ??= !generic && error.code === "VALIDATION_FAILED" && error.details?.length === 1 ? error.message : capitalise(d.issue);
   }
   return {
     status: "error",
@@ -47,6 +50,8 @@ export function fromApi(error: ApiError, values?: Record<string, string>): FormS
     ...(values ? { values } : {}),
   };
 }
+
+const capitalise = (s: string) => (s ? s[0]!.toUpperCase() + s.slice(1) : s);
 
 export const text = (form: FormData, key: string) => {
   const v = form.get(key);

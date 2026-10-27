@@ -68,11 +68,28 @@ traded for the stricter CSP). Revisit for public marketing pages with Next's exp
 traffic or hosting cost makes it worthwhile. `style-src-attr 'unsafe-inline'` is allowed because
 Radix positions popovers with style attributes.
 
-## Status (§31 Phase 1)
+## Status (§31)
 
-Done: design-system base, public layout and pages, all auth flows (incl. staff 2FA with
-recovery codes), student and admin shells, staff invitations, security headers + nonce CSP.
-Verified end-to-end in a browser against the API.
+**Phase 1 — Foundation:** design-system base, public layout and pages, all auth flows (incl. staff
+2FA with recovery codes), student and admin shells, staff invitations, security headers + nonce CSP.
+
+**Phase 2 — Course management:**
+- Public catalogue `/courses` (search, category/level/price filters, sort, pagination via URL),
+  course pages with sticky price box, syllabus accordion, preview lessons, Course JSON-LD,
+  `sitemap.xml`; home page categories and newest courses from the API.
+- Admin: course list, new course, editor tabs (details, pricing & access, syllabus builder with
+  keyboard reordering, lesson editor, resources & daily notes, publish checklist + lifecycle),
+  categories & tags, media library.
+- Uploads go straight from the browser to the provider (signed PUT, Cloudinary form, or resumable
+  TUS for Bunny) and are verified by the API. With the API's `local` media driver everything
+  works without provider accounts.
+- Long editor forms use `ActionForm`, which keeps edits after a validation error (React's
+  `<form action>` would reset them).
+- Next.js upgraded to 16.4.3 (critical advisories in 16.3.x).
+
+Verified end-to-end in a browser against the API (authoring → publish → public pages).
 
 Open: message catalogues for i18n (NFR-13 — strings are inline for now), Playwright + axe E2E
-suite in CI, Lighthouse CI, Sentry, deployment (Cloudflare/OpenNext spike), light-theme toggle.
+suite in CI, Lighthouse CI, Sentry, deployment (Cloudflare/OpenNext spike), light-theme toggle,
+drag-and-drop reordering, a confirm dialog component (native `confirm()` for now), checkout
+(Phase 3).

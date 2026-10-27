@@ -1,4 +1,6 @@
 import "server-only";
+import { cookies } from "next/headers";
+import { cookieNames } from "@/lib/auth/cookies";
 import type { ErrorCode } from "@/lib/contracts/errors";
 import { env } from "@/lib/env";
 
@@ -44,4 +46,28 @@ export async function apiRequest<T>(path: string, { method = "GET", body, access
     status: res.status,
     error: json?.error ?? { code: "INTERNAL_ERROR", message: "Something went wrong. Please try again." },
   };
+}
+
+/** API call as the signed-in user (Server Actions and Server Components only). */
+export async function authedRequest<T>(path: string, options: Omit<Options, "accessToken"> = {}): Promise<ApiResult<T>> {
+  const accessToken = (await cookies()).get(cookieNames.access)?.value;
+  if (!accessToken) return { ok: false, status: 401, error: { code: "UNAUTHENTICATED", message: "Your session expired. Reload the page and try again." } };
+  return apiRequest<T>(path, { ...options, accessToken });
+}
+
+/** Paginated endpoints return `{ data, page }`; this keeps both. Null on any failure. */
+export async function apiPage<T, P = { nextCursor: string | null; hasMore: boolean; total: number }>(
+  path: string,
+  options: { authed?: boolean } = {},
+): Promise<{ data: T[]; page: P } | null> {
+  const accessToken = options.authed ? (await cookies()).get(cookieNames.access)?.value : undefined;
+  try {
+    const res = await fetch(`${env.API_INTERNAL_URL}/api/v1${path}`, {
+      cache: "no-store",
+      headers: { accept: "application/json", ...(accessToken ? { authorization: `Bearer ${accessToken}` } : {}) },
+    });
+    return res.ok ? ((await res.json()) as { data: T[]; page: P }) : null;
+  } catch {
+    return null;
+  }
 }

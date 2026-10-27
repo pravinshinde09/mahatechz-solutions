@@ -2,7 +2,9 @@
 
 import {
   BookOpen,
+  FolderTree,
   GraduationCap,
+  Images,
   LayoutDashboard,
   Menu,
   Settings,
@@ -18,7 +20,7 @@ import { Button } from "@/components/ui/button";
 import { Sheet, SheetContent, SheetHeader, SheetTitle, SheetTrigger } from "@/components/ui/sheet";
 
 // Icons are referenced by name: components can't be passed from Server to Client Components.
-const icons = { dashboard: LayoutDashboard, courses: BookOpen, settings: Settings, staff: Users, security: ShieldCheck, learn: GraduationCap } satisfies Record<string, LucideIcon>;
+const icons = { dashboard: LayoutDashboard, courses: BookOpen, settings: Settings, staff: Users, security: ShieldCheck, learn: GraduationCap, categories: FolderTree, media: Images } satisfies Record<string, LucideIcon>;
 export type NavIcon = keyof typeof icons;
 export interface NavItem {
   href: string;
