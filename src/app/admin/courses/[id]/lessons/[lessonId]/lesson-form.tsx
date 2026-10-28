@@ -1,6 +1,7 @@
 "use client";
 
 import { Loader2, RefreshCw } from "lucide-react";
+import Link from "next/link";
 import { useActionState, useState, useTransition } from "react";
 import { ActionForm } from "@/components/forms/action-form";
 import { Field } from "@/components/forms/field";
@@ -21,6 +22,7 @@ const types = [
   { value: "EXTERNAL_VIDEO", label: "Video link (YouTube, Vimeo, Google Drive, Bunny)" },
   { value: "ARTICLE", label: "Article" },
   { value: "RESOURCE", label: "Resource / notes only" },
+  { value: "QUIZ", label: "Quiz (server-graded)" },
 ];
 
 type VideoInfo = { id: string; status: string; title: string | null; durationSeconds: number | null };
@@ -95,6 +97,18 @@ export function LessonForm({ courseId, moduleId, lesson }: { courseId: string; m
           error={errors.externalVideoUrl}
           hint="Unlisted YouTube links are visible to anyone who has them — use them only for free or preview content."
         />
+      ) : null}
+
+      {type === "QUIZ" ? (
+        <p className="rounded-md border border-border bg-background/40 px-4 py-3 text-sm">
+          {lesson.type === "QUIZ" ? (
+            <Link href={`/admin/courses/${courseId}/quizzes/${lesson.id}`} className="font-medium text-primary hover:underline">
+              Edit questions and quiz settings →
+            </Link>
+          ) : (
+            "Save the lesson as a quiz, then add its questions. It can be published once it has at least one question."
+          )}
+        </p>
       ) : null}
 
       {type === "ARTICLE" ? (

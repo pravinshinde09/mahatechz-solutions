@@ -1,4 +1,5 @@
 import type { Metadata } from "next";
+import Link from "next/link";
 import { notFound } from "next/navigation";
 import { EmptyState } from "@/components/feedback/empty-state";
 import { PageHeader } from "@/components/layout/page-header";
@@ -19,7 +20,7 @@ interface Row {
   grantedBy: string | null;
   createdAt: string;
   course: { id: string; title: string };
-  student: { fullName: string; email: string };
+  student: { id: string; fullName: string; email: string };
 }
 
 const sourceLabel: Record<string, string> = { ONLINE: "Online payment", OFFLINE: "Offline payment", ADMIN_GRANT: "Granted", FREE: "Free", BULK_IMPORT: "Bulk import" };
@@ -40,6 +41,7 @@ export default async function EnrollmentsPage(props: PageProps<"/admin/enrollmen
   const courseOptions = (courses?.data ?? []).filter((c) => c.status !== "ARCHIVED").map((c) => ({ value: c.id, label: c.title }));
   const canGrant = hasPermission(user, "enrollment.grant");
   const canChange = hasPermission(user, "enrollment.revoke");
+  const canSeeProgress = hasPermission(user, "progress.read");
 
   return (
     <>
@@ -85,9 +87,18 @@ export default async function EnrollmentsPage(props: PageProps<"/admin/enrollmen
                   <div className="flex flex-wrap items-start justify-between gap-3">
                     <div className="min-w-0">
                       <p className="font-medium">
-                        {e.student.fullName} <span className="font-normal text-muted-foreground">· {e.student.email}</span>
+                        {canSeeProgress ? (
+                          <Link href={`/admin/students/${e.student.id}`} className="hover:underline">
+                            {e.student.fullName}
+                          </Link>
+                        ) : (
+                          e.student.fullName
+                        )}{" "}
+                        <span className="font-normal text-muted-foreground">· {e.student.email}</span>
                       </p>
-                      <p className="text-muted-foreground">{e.course.title}</p>
+                      <p className="text-muted-foreground">
+                        {e.course.title} · <span className="font-mono tabular-nums">{e.progressPercent}%</span>
+                      </p>
                     </div>
                     <div className="text-right">
                       <p className={statusTone[e.status]}>{e.status.toLowerCase()}</p>

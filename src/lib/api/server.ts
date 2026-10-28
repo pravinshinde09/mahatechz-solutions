@@ -1,5 +1,5 @@
 import "server-only";
-import { cookies } from "next/headers";
+import { cookies, headers as requestHeaders } from "next/headers";
 import { cookieNames } from "@/lib/auth/cookies";
 import type { ErrorCode } from "@/lib/contracts/errors";
 import { env } from "@/lib/env";
@@ -20,6 +20,21 @@ interface Options {
   headers?: Record<string, string>;
 }
 
+/**
+ * The visitor's IP for the API's per-IP limits (spec §18.3), vouched for by the shared secret.
+ * Cloudflare sets cf-connecting-ip; other proxies x-real-ip / x-forwarded-for (first hop).
+ */
+async function forwardedFor(): Promise<Record<string, string>> {
+  if (!env.BFF_SHARED_SECRET) return {};
+  try {
+    const h = await requestHeaders();
+    const ip = h.get("cf-connecting-ip") ?? h.get("x-real-ip") ?? h.get("x-forwarded-for")?.split(",")[0]?.trim();
+    return ip ? { "x-client-ip": ip, "x-bff-secret": env.BFF_SHARED_SECRET } : {};
+  } catch {
+    return {}; // outside a request (build time): nothing to forward
+  }
+}
+
 /** Server-side call to the API (BFF → API). Never throws for HTTP errors; returns a result. */
 export async function apiRequest<T>(path: string, { method = "GET", body, accessToken, headers }: Options = {}): Promise<ApiResult<T>> {
   let res: Response;
@@ -31,6 +46,7 @@ export async function apiRequest<T>(path: string, { method = "GET", body, access
         accept: "application/json",
         ...(body !== undefined ? { "content-type": "application/json" } : {}),
         ...(accessToken ? { authorization: `Bearer ${accessToken}` } : {}),
+        ...(await forwardedFor()),
         ...headers,
       },
       ...(body !== undefined ? { body: JSON.stringify(body) } : {}),
@@ -64,7 +80,7 @@ export async function apiPage<T, P = { nextCursor: string | null; hasMore: boole
   try {
     const res = await fetch(`${env.API_INTERNAL_URL}/api/v1${path}`, {
       cache: "no-store",
-      headers: { accept: "application/json", ...(accessToken ? { authorization: `Bearer ${accessToken}` } : {}) },
+      headers: { accept: "application/json", ...(accessToken ? { authorization: `Bearer ${accessToken}` } : {}), ...(await forwardedFor()) },
     });
     return res.ok ? ((await res.json()) as { data: T[]; page: P }) : null;
   } catch {

@@ -6,13 +6,16 @@ import { useRouter } from "next/navigation";
 import { useEffect, useState } from "react";
 import { Alert, AlertDescription, AlertTitle } from "@/components/ui/alert";
 import { Button } from "@/components/ui/button";
+import type { QuizOverview } from "@/lib/contracts/assessment";
 import type { LessonContent, Playback, ProgressUpdate } from "@/lib/contracts/learning";
 import { completeLesson, startLesson } from "@/lib/learn-client";
 import { EmbedVideoPlayer, ExternalPlayer, FileVideoPlayer } from "./players";
+import { QuizCard } from "./quiz-card";
 
 interface Props {
   lesson: LessonContent;
   playback: Playback | null;
+  quiz: QuizOverview | null;
   next: { href: string; title: string } | null;
 }
 
@@ -22,7 +25,7 @@ const minutesLeft = (until: number, now: number) => Math.max(1, Math.ceil((until
  * The lesson stage (spec §14.2): player or article, and the completion area. Progress is always
  * the server's answer — the client never sets a percentage.
  */
-export function LessonStage({ lesson, playback, next }: Props) {
+export function LessonStage({ lesson, playback, quiz, next }: Props) {
   const router = useRouter();
   const [watchSessionId, setWatchSessionId] = useState<string | null>(null);
   const [resumeAt, setResumeAt] = useState(playback?.resumeAt ?? lesson.progress.lastPositionSeconds);
@@ -92,8 +95,10 @@ export function LessonStage({ lesson, playback, next }: Props) {
     stage = <article className="prose-content rounded-lg border border-border bg-surface p-6 md:p-8" dangerouslySetInnerHTML={{ __html: lesson.articleHtml }} />;
   } else if (lesson.type === "VIDEO" || lesson.type === "LIVE_SESSION") {
     stage = <p className="rounded-lg border border-border bg-surface p-6 text-muted-foreground">The video for this lesson is still being prepared. Please check back soon.</p>;
-  } else if (lesson.type === "QUIZ" || lesson.type === "ASSIGNMENT") {
-    stage = <p className="rounded-lg border border-border bg-surface p-6 text-muted-foreground">Quizzes and assignments open soon. You can continue with the next lesson.</p>;
+  } else if (lesson.type === "QUIZ") {
+    stage = quiz ? <QuizCard quiz={quiz} href={`/app/learn/${lesson.courseSlug}/quiz/${lesson.id}`} /> : <p className="rounded-lg border border-border bg-surface p-6 text-muted-foreground">This quiz isn&apos;t ready yet.</p>;
+  } else if (lesson.type === "ASSIGNMENT") {
+    stage = <p className="rounded-lg border border-border bg-surface p-6 text-muted-foreground">Assignments open soon. You can continue with the next lesson.</p>;
   } else {
     stage = <p className="rounded-lg border border-border bg-surface p-6 text-muted-foreground">Download the files for this lesson below.</p>;
   }
@@ -145,6 +150,8 @@ export function LessonStage({ lesson, playback, next }: Props) {
                 </span>
               ) : null}
             </>
+          ) : lesson.completion.mode === "quiz" ? (
+            <span className="text-muted-foreground">Completes when you pass the quiz{quiz ? ` (${quiz.passPercent}% or more)` : ""}.</span>
           ) : (
             <span className="text-muted-foreground">This lesson is marked complete by your instructor.</span>
           )}

@@ -15,6 +15,7 @@ const LIMITS: Partial<Record<MediaPurpose, { accept: string; maxBytes: number; h
   PRACTICE_FILE: { accept: ".dwg,.dxf,.rvt,.rfa,.zip", maxBytes: 200 * MB, hint: "DWG, DXF, RVT, RFA or ZIP, up to 200 MB" },
   PAYMENT_PROOF: { accept: ".jpg,.jpeg,.png,.pdf", maxBytes: 5 * MB, hint: "Screenshot (JPG/PNG) or PDF receipt, up to 5 MB" },
   SUPPORT_ATTACHMENT: { accept: ".jpg,.jpeg,.png,.webp,.pdf", maxBytes: 10 * MB, hint: "Screenshot or PDF, up to 10 MB" },
+  CERTIFICATE_ASSET: { accept: ".png,.jpg,.jpeg,.pdf", maxBytes: 10 * MB, hint: "PNG, JPEG or a one-page PDF (A4 landscape), up to 10 MB" },
 };
 
 type StartResult = Awaited<ReturnType<typeof startUploadAction>>;

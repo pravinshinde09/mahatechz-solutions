@@ -1,6 +1,6 @@
 "use client";
 
-import { ArrowDown, ArrowUp, FileText, Link2, Paperclip, Pencil, PlayCircle, Trash2 } from "lucide-react";
+import { ArrowDown, ArrowUp, ClipboardList, FileText, Link2, Paperclip, Pencil, PlayCircle, Trash2 } from "lucide-react";
 import Link from "next/link";
 import { useActionState, useOptimistic, useState, useTransition } from "react";
 import { EmptyState } from "@/components/feedback/empty-state";
@@ -19,6 +19,7 @@ const lessonTypes = [
   { value: "EXTERNAL_VIDEO", label: "Video link (YouTube, Vimeo, Drive)", icon: Link2 },
   { value: "ARTICLE", label: "Article", icon: FileText },
   { value: "RESOURCE", label: "Resource / notes", icon: Paperclip },
+  { value: "QUIZ", label: "Quiz", icon: ClipboardList },
 ] as const;
 const iconFor = (type: string) => lessonTypes.find((t) => t.value === type)?.icon ?? FileText;
 
@@ -85,6 +86,11 @@ export function SyllabusBuilder({ courseId, modules }: { courseId: string; modul
                           <span className={`rounded-full border px-2 py-0.5 ${l.isPublished ? "border-success/40 text-success" : "border-border text-muted-foreground"}`}>
                             {l.isPublished ? "Published" : "Draft"}
                           </span>
+                          {l.type === "QUIZ" ? (
+                            <Link href={`/admin/courses/${courseId}/quizzes/${l.id}`} className="rounded-full border border-primary/40 px-2 py-0.5 text-primary hover:underline">
+                              Questions
+                            </Link>
+                          ) : null}
                           {l.type === "VIDEO" && l.video && l.video.status !== "READY" ? (
                             <span className="rounded-full border border-warning/40 px-2 py-0.5 text-warning">Video {l.video.status.toLowerCase()}</span>
                           ) : null}

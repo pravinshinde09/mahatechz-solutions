@@ -17,6 +17,8 @@ export default async function AdminLayout({ children }: LayoutProps<"/admin">) {
         ...(hasPermission(user, "payment.read.details") ? [{ href: "/admin/offline-payments", label: "Offline payments", icon: "verify" } as const] : []),
         ...(hasPermission(user, "payment.read.details") ? [{ href: "/admin/payments", label: "Payments", icon: "payments" } as const] : []),
         ...(hasPermission(user, "enrollment.read") ? [{ href: "/admin/enrollments", label: "Enrolments", icon: "enrollments" } as const] : []),
+        ...(hasPermission(user, "certificate.read") ? [{ href: "/admin/certificates", label: "Certificates", icon: "certificates" } as const] : []),
+        ...(hasPermission(user, "report.export") ? [{ href: "/admin/reports", label: "Reports", icon: "reports" } as const] : []),
         ...(hasPermission(user, "live.manage") ? [{ href: "/admin/live", label: "Live classes", icon: "live" } as const] : []),
         ...(hasPermission(user, "announcement.manage") ? [{ href: "/admin/announcements", label: "Announcements", icon: "announcements" } as const] : []),
         ...(hasPermission(user, "support.manage") ? [{ href: "/admin/support", label: "Support", icon: "support" } as const] : []),

@@ -7,6 +7,8 @@ const schema = z.object({
   /** Browser-facing API origin (local media URLs in development). */
   API_PUBLIC_URL: z.url().default("http://localhost:4000"),
   WEB_APP_URL: z.url().default("http://localhost:3000"),
+  /** Same value as the API's BFF_SHARED_SECRET: lets the API rate-limit by the visitor's IP, not ours. */
+  BFF_SHARED_SECRET: z.string().min(32).optional(),
   COOKIE_SECURE: z
     .enum(["true", "false"])
     .default("false")

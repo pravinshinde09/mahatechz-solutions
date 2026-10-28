@@ -70,6 +70,8 @@
   --danger: #f87171;
   --ring: #22d3ee;
   --grid-line: rgba(96, 165, 250, 0.06);
+  /* Chart marks: validated against the chart surface (dataviz lightness band, ≥ 3:1). */
+  --chart-1: #3b82f6;
   --gradient-hero: linear-gradient(135deg, #0a1020 0%, #0f1e3d 55%, #1e1b4b 100%);
   --shadow-card-value: 0 1px 0 rgba(255, 255, 255, 0.04) inset, 0 8px 24px rgba(0, 0, 0, 0.35);
   --glow-primary: 0 0 0 1px rgba(96, 165, 250, 0.5), 0 0 24px rgba(34, 211, 238, 0.18);
@@ -94,6 +96,7 @@
   --danger: #b91c1c;
   --ring: #2563eb;
   --grid-line: rgba(37, 99, 235, 0.05);
+  --chart-1: #2563eb;
   --gradient-hero: linear-gradient(135deg, #f8fafc, #e0ecff);
   --shadow-card-value: 0 1px 2px rgba(15, 23, 42, 0.06), 0 4px 12px rgba(15, 23, 42, 0.06);
   --glow-primary: 0 0 0 1px rgba(37, 99, 235, 0.45), 0 0 20px rgba(37, 99, 235, 0.12);

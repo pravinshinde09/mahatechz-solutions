@@ -1,4 +1,4 @@
-import { Activity, CircleCheck } from "lucide-react";
+import { Activity, Award, CircleCheck, ListChecks } from "lucide-react";
 import type { Metadata } from "next";
 import Link from "next/link";
 import type { z } from "zod";
@@ -81,6 +81,26 @@ export default async function ProgressPage(props: PageProps<"/app/progress">) {
                       </li>
                     ))}
                   </ul>
+                  {r.quizzes.length ? (
+                    <div className="mt-6">
+                      <h3 className="text-sm font-medium">Quiz scores</h3>
+                      <p className="mt-1 mb-2 text-xs text-muted-foreground">Verified — graded on the server. Your best attempt counts.</p>
+                      <ul className="divide-y divide-border rounded-md border border-border text-sm">
+                        {r.quizzes.map((q) => (
+                          <li key={q.id} className="flex flex-wrap items-center justify-between gap-2 px-3 py-2">
+                            <Link href={`/app/learn/${r.course.slug}/${q.id}`} className="min-w-0 truncate hover:underline">
+                              {q.title}
+                              {q.required ? <span className="ml-2 text-xs text-muted-foreground">required</span> : null}
+                            </Link>
+                            <span className={q.passed ? "text-success" : "text-muted-foreground"}>
+                              {q.bestScorePercent === null ? "Not taken" : <span className="font-mono tabular">{q.bestScorePercent}%</span>}
+                              {q.passed ? " · passed" : ""}
+                            </span>
+                          </li>
+                        ))}
+                      </ul>
+                    </div>
+                  ) : null}
                 </div>
                 <div className="rounded-md border border-dashed border-border p-4">
                   <h3 className="inline-flex items-center gap-2 text-sm font-medium">
@@ -107,6 +127,41 @@ export default async function ProgressPage(props: PageProps<"/app/progress">) {
                   </dl>
                 </div>
               </div>
+
+              {r.requirements.unmet.length || r.certificate.enabled ? (
+                <div className="mt-5 grid gap-3 border-t border-border pt-5 text-sm sm:grid-cols-2">
+                  {r.requirements.unmet.length ? (
+                    <div>
+                      <h3 className="inline-flex items-center gap-2 font-medium">
+                        <ListChecks className="size-4 text-muted-foreground" aria-hidden="true" /> Still to do
+                      </h3>
+                      <ul className="mt-2 list-disc space-y-1 pl-5 text-muted-foreground">
+                        {r.requirements.unmet.map((u) => (
+                          <li key={u.code}>{u.message}</li>
+                        ))}
+                      </ul>
+                    </div>
+                  ) : null}
+                  {r.certificate.enabled ? (
+                    <div>
+                      <h3 className="inline-flex items-center gap-2 font-medium">
+                        <Award className="size-4 text-muted-foreground" aria-hidden="true" /> Certificate
+                      </h3>
+                      <p className="mt-2 text-muted-foreground">
+                        {r.certificate.id ? (
+                          <Link href="/app/certificates" className="text-primary hover:underline">
+                            Your certificate is ready →
+                          </Link>
+                        ) : r.progress.completedAt ? (
+                          "Your certificate is being prepared — we'll email you when it's issued."
+                        ) : (
+                          "This course awards a certificate when you complete it."
+                        )}
+                      </p>
+                    </div>
+                  ) : null}
+                </div>
+              ) : null}
             </section>
           ))}
         </div>

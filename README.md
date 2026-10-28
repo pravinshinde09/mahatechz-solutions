@@ -11,7 +11,7 @@ staff area (`/admin`). It never touches the database — every read and write go
 
 ```bash
 npm install
-cp .env.example .env.local      # API_INTERNAL_URL, WEB_APP_URL, COOKIE_SECURE
+cp .env.example .env.local      # API_INTERNAL_URL, WEB_APP_URL, COOKIE_SECURE, BFF_SHARED_SECRET
 npm run dev                     # http://localhost:3000 — needs the API running on :4000
 ```
 
@@ -126,6 +126,31 @@ Verified end-to-end in a browser: video completed from real heartbeats, article 
 lessons after their minimum time, course completion + notification, announcements read state,
 live join (link withheld before the window), progress, support round trip with an internal note,
 admin scheduling (lookalike Meet link rejected) and announcement fan-out, 390 px mobile layout.
+
+**Phase 5 — Completion & analytics (web):**
+- Quizzes: a quiz card on QUIZ lessons and `/app/learn/[course]/quiz/[quizId]` — question
+  navigator, countdown (auto-submit at zero), autosave, review screen, results with answers per the
+  quiz's setting. Calls go through `/api/learn/quiz/:id/:action` (allowlisted, Origin-checked,
+  refreshes the session on 401 so long quizzes survive token expiry).
+- `/app/certificates` (download PDF, copy verification link, LinkedIn "add to profile"); progress
+  page shows quiz scores (verified), what the completion rule still needs, and the certificate.
+- Public `/verify` (code or number) and `/verify/[code]` — minimal fields, `noindex`.
+- Admin: dashboard on `/admin/analytics/overview` (KPI tiles with their §17.2 definitions,
+  enrolments and net revenue per IST day as charts with table views, action queue, per-course
+  completion and at-risk); course analytics (lesson funnel, at-risk list, quiz stats); student page
+  with lesson-level progress, completion overrides and certificate issue/override; Certificates
+  (issued list, ready-to-issue with bulk issue, detail with revoke/reissue and history, template
+  designer with a live preview and real PDF preview); course "Completion & certificate" tab; quiz
+  builder; Reports (CSV export builder + 24-hour downloads).
+- The BFF forwards the visitor's IP to the API (`BFF_SHARED_SECRET`) so per-IP rate limits apply per
+  visitor.
+
+Verified end-to-end in a browser: template designed and previewed, certificates switched on for a
+course, bulk issue from the ready list, PDF content and QR code (decoded) checked, public
+verification (valid / revoked without reason / superseded → reissue), quiz built in the admin and
+taken by a student (fail, then pass → course complete → automatic certificate), completion
+override + issue, course analytics at-risk, CSV export download, dashboard figures against seeded
+data, 390 px layouts without horizontal scroll.
 
 Open: message catalogues for i18n (NFR-13 — strings are inline for now), Playwright + axe E2E
 suite in CI, Lighthouse CI, Sentry, deployment (Cloudflare/OpenNext spike), light-theme toggle,

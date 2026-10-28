@@ -25,8 +25,9 @@ export default async function MediaLibraryPage(props: PageProps<"/admin/media">)
   if (!hasPermission(user, "media.upload")) notFound();
   const params = await props.searchParams;
   const purpose = typeof params.purpose === "string" ? params.purpose : "";
+  const status = typeof params.status === "string" && /^[A-Z_]+$/.test(params.status) ? params.status : "";
   const q = typeof params.q === "string" ? params.q : "";
-  const result = await apiPage<MediaAsset, { total: number }>(`/admin/media?${new URLSearchParams({ pageSize: "50", ...(purpose ? { purpose } : {}), ...(q ? { q } : {}) })}`, { authed: true });
+  const result = await apiPage<MediaAsset, { total: number }>(`/admin/media?${new URLSearchParams({ pageSize: "50", ...(purpose ? { purpose } : {}), ...(status ? { status } : {}), ...(q ? { q } : {}) })}`, { authed: true });
   const rows = result?.data ?? [];
 
   return (

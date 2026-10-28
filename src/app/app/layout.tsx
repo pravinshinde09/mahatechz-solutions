@@ -8,12 +8,12 @@ import { requireUser } from "@/lib/auth/session";
 
 export const metadata: Metadata = { title: { default: "Dashboard", template: "%s · Mahatecz Learning" }, robots: { index: false } };
 
-// Certificates arrive with Phase 5 (§31).
 const nav: NavItem[] = [
   { href: "/app", label: "Dashboard", icon: "dashboard", exact: true },
   { href: "/app/courses", label: "My courses", icon: "courses" },
   { href: "/app/live", label: "Live classes", icon: "live" },
   { href: "/app/progress", label: "Progress", icon: "progress" },
+  { href: "/app/certificates", label: "Certificates", icon: "certificates" },
   { href: "/app/notifications", label: "Notifications", icon: "notifications" },
   { href: "/app/payments", label: "Payments", icon: "payments" },
   { href: "/app/support", label: "Help & support", icon: "support" },

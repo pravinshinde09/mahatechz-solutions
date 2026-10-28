@@ -8,6 +8,7 @@ import { SyllabusSheet } from "@/components/learn/syllabus-sheet";
 import { Button } from "@/components/ui/button";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { authedRequest } from "@/lib/api/server";
+import type { QuizOverview } from "@/lib/contracts/assessment";
 import type { AnnouncementView, LearnCourse, LessonContent, Playback } from "@/lib/contracts/learning";
 import { formatDateTime } from "@/lib/format";
 import { getLearnCourse } from "../data";
@@ -34,11 +35,13 @@ export default async function LessonPage(props: PageProps<"/app/learn/[courseSlu
   const lesson = lessonRes.data;
   if (lesson.courseId !== course.course.id) return <NoAccess error={{ code: "NOT_FOUND", message: "" }} courseSlug={courseSlug} />;
 
-  const [playbackRes, announcementsRes] = await Promise.all([
+  const [playbackRes, announcementsRes, quizRes] = await Promise.all([
     lesson.hasPlayback ? authedRequest<Playback>(`/lessons/${lesson.id}/playback`) : Promise.resolve(null),
     authedRequest<AnnouncementView[]>(`/learn/courses/${course.course.id}/announcements`),
+    lesson.type === "QUIZ" ? authedRequest<QuizOverview>(`/quizzes/${lesson.id}`) : Promise.resolve(null),
   ]);
   const playback = playbackRes?.ok ? playbackRes.data : null;
+  const quiz = quizRes?.ok ? quizRes.data : null;
   const announcements = announcementsRes.ok ? announcementsRes.data : [];
 
   const allLessons = course.modules.flatMap((m) => m.lessons);
@@ -71,7 +74,7 @@ export default async function LessonPage(props: PageProps<"/app/learn/[courseSlu
           <h1 className="mt-1 font-sans text-2xl leading-8 font-semibold md:text-3xl md:leading-9">{lesson.title}</h1>
         </header>
 
-        <LessonStage key={lesson.id} lesson={lesson} playback={playback} next={next} />
+        <LessonStage key={lesson.id} lesson={lesson} playback={playback} quiz={quiz} next={next} />
 
         <nav aria-label="Lesson navigation" className="flex flex-wrap justify-between gap-3">
           {lesson.prevLessonId ? (

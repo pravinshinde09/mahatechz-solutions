@@ -9,15 +9,16 @@ export function CourseTabs({ base }: { base: string }) {
   const tabs = [
     { href: base, label: "Details", exact: true },
     { href: `${base}/pricing`, label: "Pricing & access" },
-    { href: `${base}/syllabus`, label: "Syllabus", also: `${base}/lessons` },
+    { href: `${base}/syllabus`, label: "Syllabus", also: [`${base}/lessons`, `${base}/quizzes`] },
     { href: `${base}/resources`, label: "Resources & notes" },
+    { href: `${base}/certificate`, label: "Completion & certificate" },
     { href: `${base}/publish`, label: "Publish" },
   ];
   return (
     <nav aria-label="Course editor" className="-mx-1 mb-6 overflow-x-auto border-b border-border">
       <ul className="flex min-w-max gap-1 px-1">
         {tabs.map((t) => {
-          const active = t.exact ? pathname === t.href : pathname.startsWith(t.href) || (t.also ? pathname.startsWith(t.also) : false);
+          const active = t.exact ? pathname === t.href : pathname.startsWith(t.href) || (t.also ? [t.also].flat().some((p) => pathname.startsWith(p)) : false);
           return (
             <li key={t.href}>
               <Link

@@ -8,6 +8,7 @@ const columns = [
       { href: "/courses", label: "All courses" },
       { href: "/register", label: "Create an account" },
       { href: "/login", label: "Sign in" },
+      { href: "/verify", label: "Verify a certificate" },
     ],
   },
   {
