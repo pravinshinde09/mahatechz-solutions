@@ -11,7 +11,7 @@ import type { CourseDetail } from "@/lib/contracts/catalog";
 import { formatDate, formatDuration, languageLabel, levelLabel } from "@/lib/format";
 
 const loadCourse = cache(async (slug: string) => {
-  const res = await apiRequest<CourseDetail>(`/courses/${encodeURIComponent(slug)}`, { accessToken: await getAccessToken() });
+  const res = await apiRequest<CourseDetail>(`/courses/${encodeURIComponent(slug)}`, { accessToken: await getAccessToken(), revalidate: 60 });
   return res.ok ? res.data : null;
 });
 

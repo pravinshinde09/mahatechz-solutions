@@ -42,3 +42,9 @@ next-env.d.ts
 
 # keep the template
 !.env.example
+
+# end-to-end tests (Playwright)
+/test-results/
+/playwright-report/
+/e2e/.auth/
+/e2e/.env.e2e

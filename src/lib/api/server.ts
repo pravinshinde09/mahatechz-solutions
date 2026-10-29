@@ -18,6 +18,17 @@ interface Options {
   body?: unknown;
   accessToken?: string | null;
   headers?: Record<string, string>;
+  /** Seconds to keep an anonymous GET in Next's data cache. Ignored when signed in. */
+  revalidate?: number;
+}
+
+/**
+ * Anonymous catalogue reads are shared by every visitor, so they may be cached briefly (the API
+ * sends `public, max-age=60`). A cached read can't carry the visitor's IP (it would split the cache
+ * per visitor), so only fixed URLs use this — never free-text search, which keeps per-IP limits.
+ */
+function caching(revalidate: number | undefined, accessToken: string | null | undefined, method: string) {
+  return revalidate !== undefined && !accessToken && method === "GET" ? ({ next: { revalidate } } as const) : null;
 }
 
 /**
@@ -36,17 +47,18 @@ async function forwardedFor(): Promise<Record<string, string>> {
 }
 
 /** Server-side call to the API (BFF → API). Never throws for HTTP errors; returns a result. */
-export async function apiRequest<T>(path: string, { method = "GET", body, accessToken, headers }: Options = {}): Promise<ApiResult<T>> {
+export async function apiRequest<T>(path: string, { method = "GET", body, accessToken, headers, revalidate }: Options = {}): Promise<ApiResult<T>> {
+  const cached = caching(revalidate, accessToken, method);
   let res: Response;
   try {
     res = await fetch(`${env.API_INTERNAL_URL}/api/v1${path}`, {
       method,
-      cache: "no-store",
+      ...(cached ?? { cache: "no-store" }),
       headers: {
         accept: "application/json",
         ...(body !== undefined ? { "content-type": "application/json" } : {}),
         ...(accessToken ? { authorization: `Bearer ${accessToken}` } : {}),
-        ...(await forwardedFor()),
+        ...(cached ? {} : await forwardedFor()),
         ...headers,
       },
       ...(body !== undefined ? { body: JSON.stringify(body) } : {}),
@@ -74,13 +86,14 @@ export async function authedRequest<T>(path: string, options: Omit<Options, "acc
 /** Paginated endpoints return `{ data, page }`; this keeps both. Null on any failure. */
 export async function apiPage<T, P = { nextCursor: string | null; hasMore: boolean; total: number }>(
   path: string,
-  options: { authed?: boolean } = {},
+  options: { authed?: boolean; revalidate?: number } = {},
 ): Promise<{ data: T[]; page: P } | null> {
   const accessToken = options.authed ? (await cookies()).get(cookieNames.access)?.value : undefined;
+  const cached = caching(options.revalidate, accessToken, "GET");
   try {
     const res = await fetch(`${env.API_INTERNAL_URL}/api/v1${path}`, {
-      cache: "no-store",
-      headers: { accept: "application/json", ...(accessToken ? { authorization: `Bearer ${accessToken}` } : {}), ...(await forwardedFor()) },
+      ...(cached ?? { cache: "no-store" }),
+      headers: { accept: "application/json", ...(accessToken ? { authorization: `Bearer ${accessToken}` } : {}), ...(cached ? {} : await forwardedFor()) },
     });
     return res.ok ? ((await res.json()) as { data: T[]; page: P }) : null;
   } catch {

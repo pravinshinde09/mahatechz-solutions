@@ -17,8 +17,13 @@ export function ProsePage({ title, updated, children }: { title: string; updated
 export function DraftNotice() {
   return (
     <p className="rounded-md border border-warning/40 bg-warning/10 px-4 py-3 text-sm">
-      <strong className="text-warning">Draft.</strong> This policy is a placeholder pending legal review and will be replaced before payments go
-      live.
+      <strong className="text-warning">Draft.</strong> This policy describes how the platform works today and is pending legal review. It will be
+      replaced by the reviewed version before payments go live.
     </p>
   );
+}
+
+/** A value the business or counsel still has to decide (spec §33); easy to find before launch. */
+export function Tbc({ children }: { children: ReactNode }) {
+  return <mark className="rounded-sm bg-warning/15 px-1 text-foreground">[to be confirmed: {children}]</mark>;
 }

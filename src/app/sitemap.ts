@@ -5,7 +5,7 @@ import { env } from "@/lib/env";
 /** Public pages + every published course (spec FR-CAT-06). */
 export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
   const base = env.WEB_APP_URL;
-  const staticPages = ["", "/courses", "/about", "/contact"].map((path) => ({ url: `${base}${path}`, changeFrequency: "weekly" as const }));
+  const staticPages = ["", "/courses", "/about", "/contact", "/accessibility"].map((path) => ({ url: `${base}${path}`, changeFrequency: "weekly" as const }));
   const courses = await apiRequest<{ slug: string; updatedAt: string }[]>("/sitemap/courses");
   return [
     ...staticPages,

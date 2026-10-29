@@ -32,7 +32,11 @@ export default async function CoursesPage(props: PageProps<"/courses">) {
   const params = Object.fromEntries(FILTERS.flatMap((k) => (typeof raw[k] === "string" && raw[k] ? [[k, raw[k] as string]] : []))) as Partial<Record<(typeof FILTERS)[number], string>>;
   const query = new URLSearchParams({ ...params, limit: "12" });
 
-  const [page, categories] = await Promise.all([apiPage<CourseCardData>(`/courses?${query}`), apiRequest<CategoryNode[]>("/categories")]);
+  const [page, categories] = await Promise.all([
+    // The unfiltered first page is shared by everyone; filtered and search pages stay live.
+    apiPage<CourseCardData>(`/courses?${query}`, Object.keys(params).length === 0 ? { revalidate: 60 } : {}),
+    apiRequest<CategoryNode[]>("/categories", { revalidate: 60 }),
+  ]);
   const tree = categories.ok ? categories.data : [];
   const filtered = Boolean(params.q || params.category || params.level || params.price);
   const nextHref = page?.page.nextCursor ? `/courses?${new URLSearchParams({ ...params, cursor: page.page.nextCursor })}` : null;

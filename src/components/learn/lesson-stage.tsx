@@ -136,7 +136,8 @@ export function LessonStage({ lesson, playback, quiz, next }: Props) {
             </span>
           ) : lesson.completion.mode === "manual" || lesson.completion.mode === "resource" ? (
             <>
-              <Button size="sm" onClick={markComplete} disabled={waiting || submitting}>
+              {/* Enabled once the server has recorded the lesson as opened (the minimum time counts from then). */}
+              <Button size="sm" onClick={markComplete} disabled={!ready || waiting || submitting}>
                 {submitting ? "Saving…" : "Mark as complete"}
               </Button>
               {waiting ? (

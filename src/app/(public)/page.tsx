@@ -37,7 +37,10 @@ const faqs = [
 ];
 
 export default async function HomePage() {
-  const [categoryRes, newest] = await Promise.all([apiRequest<CategoryNode[]>("/categories"), apiPage<CourseCardData>("/courses?limit=3")]);
+  const [categoryRes, newest] = await Promise.all([
+    apiRequest<CategoryNode[]>("/categories", { revalidate: 60 }),
+    apiPage<CourseCardData>("/courses?limit=3", { revalidate: 60 }),
+  ]);
   const categories = categoryRes.ok ? categoryRes.data : [];
   const courses = newest?.data ?? [];
   return (

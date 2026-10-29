@@ -24,6 +24,10 @@ const columns = [
       { href: "/terms", label: "Terms of use" },
       { href: "/privacy", label: "Privacy policy" },
       { href: "/refund-policy", label: "Refund policy" },
+      { href: "/course-access-policy", label: "Course access" },
+      { href: "/certificate-policy", label: "Certificate policy" },
+      { href: "/cookies", label: "Cookies" },
+      { href: "/accessibility", label: "Accessibility" },
     ],
   },
 ];

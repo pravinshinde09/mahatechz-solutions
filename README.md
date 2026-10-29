@@ -152,7 +152,21 @@ taken by a student (fail, then pass → course complete → automatic certificat
 override + issue, course analytics at-risk, CSV export download, dashboard figures against seeded
 data, 390 px layouts without horizontal scroll.
 
-Open: message catalogues for i18n (NFR-13 — strings are inline for now), Playwright + axe E2E
-suite in CI, Lighthouse CI, Sentry, deployment (Cloudflare/OpenNext spike), light-theme toggle,
-drag-and-drop reordering, a confirm dialog component (native `confirm()` for now), invoices /
-GST receipts, final legal policy pages (required before Razorpay activation).
+**Phase 6 — Production readiness** (launch status: API repo `docs/launch-checklist.md`):
+- Playwright + axe E2E suite in `e2e/` (see [e2e/README.md](e2e/README.md)): public and policy
+  pages, the student journey to an automatic certificate, admin with 2FA; zero serious/critical
+  violations and no horizontal scroll on phones.
+- Sentry (`SENTRY_DSN_WEB`, `NEXT_PUBLIC_SENTRY_DSN`): server errors via `instrumentation.ts`;
+  the browser SDK loads lazily through the `/monitoring` tunnel. Source maps upload when
+  `SENTRY_AUTH_TOKEN` is set at build time.
+- Performance: first-load JS 164 KB gzipped (budget 170 KB, §21.7). Anonymous fixed-URL catalogue
+  reads use Next's data cache for 60 s (`revalidate` option in `src/lib/api/server.ts`); search,
+  filters and signed-in reads stay live.
+- Policy pages: terms, privacy, refund, course access, certificate, cookies (factual drafts with
+  "[to be confirmed]" markers pending business decisions and legal review) and an accessibility
+  statement, all linked from the footer.
+- "Mark as complete" stays disabled until the lesson has been opened on the server.
+
+Open: message catalogues for i18n (NFR-13 — strings are inline for now), Lighthouse CI, deployment
+(Cloudflare/OpenNext spike), light-theme toggle, drag-and-drop reordering, a confirm dialog
+component (native `confirm()` for now), invoices / GST receipts, counsel-approved policy text.
